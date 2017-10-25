@@ -37,6 +37,7 @@ for iter in range(10000):
     # 用L1_delta更新权重矩阵syn0
     syn0 += np.dot(l0.T,l1_delta)
 
+
 # 输出迭代的结果
 print(syn0)
 
