@@ -1,6 +1,7 @@
 from numpy import *
 # 导入运算符模块
 import operator
+from os import listdir
 
 def createDataSet():
     group = array([[1.0, 1.1], [1.0, 1.0], [0, 0], [0, 0.1]])
@@ -20,7 +21,7 @@ def classify0(inX,dataSet,labels,k):
         sqDiffMat=diffMat**2
         print(sqDiffMat)
         sqDistances=sqDiffMat.sum(axis=1)
-        distances=sqDistances**0.5
+        distances= sqDistances**0.5
         #排序，这里argsort()返回的是数据从小到大的索引值,这里这就是第几行数据
         sortedDisIndicies =distances.argsort()
         print(sortedDisIndicies)
@@ -32,8 +33,7 @@ def classify0(inX,dataSet,labels,k):
                 voteIlabel=labels[sortedDisIndicies[i]]
                 classCount[voteIlabel]=classCount.get(voteIlabel,0)+1;
         #逆序排序，找出出现频率最多的类别
-        sortedClassCount=sorted(classCount.iteritems(),
-                                key=operator.itemgetter(1),reverse=True)
+        sortedClassCount=sorted(classCount.items(),key=operator.itemgetter(1),reverse=True)
         print(sortedClassCount)
         return sortedClassCount[0][0]
 
@@ -59,3 +59,53 @@ def file2matrix(filename):
                 classLabelVector.append(int(listFromLine[-1]))
                 index +=1
         return returnMat,classLabelVector
+
+#归一化特征值
+def autoNorm(dataSet):
+        #每列的最小值
+        minVals=dataSet.min(0)
+        #每列的最大值
+        maxVals=dataSet.max(0)
+        #最大值与最小值的差值
+        ranges=maxVals-minVals
+        normDataSet=zeros(shape(dataSet))
+        m=dataSet.shape[0]
+        #minVals是1*3的矩阵，使用tile函数复制成和dataSet同样大小的矩阵，方便计算
+        normDataSet=dataSet-tile(minVals,(m,1))
+        normDataSet=normDataSet/tile(ranges,(m,1))
+        return normDataSet,ranges,minVals
+
+#原始测试分类器
+def datingClassTest():
+        hoRatio=0.10
+        datingDataMat,datingLabels=file2matrix('datingTestSet2.txt')
+        normMat,ranges,minVals=autoNorm(datingDataMat)
+        m=normMat.shape(0)
+        #10%的数据用于测试数据集
+        numTestVecs=int(m*hoRatio)
+        errorCount=0.0
+        for i in range(numTestVecs):
+                classifierResults=classify0(normMat[i,:],normMat[numTestVecs:m,:], datingLabels[numTestVecs:m],3)
+                print("the classifier came back with: %d,the real answer id: %d"%(classifierResults,datingLabels[i]))
+                if(classifierResults!=datingLabels[i]):errorCount +=1.0
+        print("the total error rate is: %f" %(errorCount/float(numTestVecs)))
+
+# 约会网站预测函数
+def classifyPerson():
+        resultList=['not at all','in small doses','in large doses']
+        percentTats=float(input("在游戏上花费的时间占比( )?"))
+        ffMiles=float(input("每年航空的里程数?"))
+        iceCream=float(input("每年吃的冰淇淋（升）?"))
+        datingDataMat,datingLabels=file2matrix('datingTestSet2.txt')
+        normMat, ranges, minVals=autoNorm(datingDataMat)
+        inArr=array([ffMiles,percentTats,iceCream])
+        classifierResult=classify0((inArr-minVals)/ranges,normMat,datingLabels,3)
+        print("你可能是属于以下这类人：",resultList[classifierResult - 1])
+
+if __name__ == '__main__':
+    classifyPerson()
+    # datingClassTest()
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    # ax.scatter(datingDataMat[:, 1], datingDataMat[:, 2], 15.0 * array(datingLabels), array(datingLabels))
+    # plt.show()
