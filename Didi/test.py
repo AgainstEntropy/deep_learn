@@ -9,8 +9,6 @@ def loadDataSet():
     dataMat = []
     xcat = []
     ycat = []
-    x = [459.4, 454.5, 440.0]
-    y = [142.4, 529.9, 1329.7]
     # 读取文件
     with open('test.txt') as f:
         # 计数器
@@ -21,34 +19,21 @@ def loadDataSet():
             if line_nu < 1000:
                 # strip()把末尾的'\n'删掉 split分离数据
                 lineArr = line.strip().split()
-                dataMat.append([lineArr[0], lineArr[2], lineArr[3]])
+                dataMat.append([lineArr[2], lineArr[3]])
                 line_nu += 1
             else:
                 break
-    print(line_nu)
 
     dataArr = array(dataMat)
     print(dataArr)
 
     # 画出所有点的信息
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    #设置x轴范围
-    xlim(0, 1000)
-    #设置y轴范围
-    ylim(-500, 2000)
-    # 画散点图
-    ax.scatter(x, y, c='b', marker='D')
-    plt.axis('on')
-    k = 0
-    for i in range(line_nu):
-        if(0<=float(dataArr[i, 1])<1000 & -500<=float(dataArr[i, 2])<2000):
-                xcat = [dataArr[i, 1]]
-                ycat = [dataArr[i, 2]]
-                ax.scatter(xcat, ycat, c='r', marker='.')
-                k += 1
-                plt.pause(0.01)
-    print(k)
+    plt.figure()
+
+    for i in range(1, line_nu):
+                xcat.append([dataArr[i, 0]])
+                ycat.append([dataArr[i, 1]])
+    plot(xcat, ycat, c='r', marker='.')
     # 设置X轴标签
     plt.xlabel('X')
     # 设置Y轴标签
